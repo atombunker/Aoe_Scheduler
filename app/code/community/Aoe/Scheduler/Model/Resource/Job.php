@@ -2,10 +2,14 @@
 
 class Aoe_Scheduler_Model_Resource_Job extends Mage_Core_Model_Resource_Db_Abstract
 {
-    /** @var bool */
+    /**
+     * @var bool
+     */
     protected $loaded = false;
 
-    /** @var Aoe_Scheduler_Model_Job[] */
+    /**
+     * @var Aoe_Scheduler_Model_Job[]
+     */
     protected $jobs = [];
 
     /**
@@ -46,13 +50,13 @@ class Aoe_Scheduler_Model_Resource_Job extends Mage_Core_Model_Resource_Db_Abstr
      */
     public function load(Mage_Core_Model_Abstract $object, mixed $value, $field = null)
     {
-        if (!$object instanceof Aoe_Scheduler_Model_Job) {
+        if (! $object instanceof Aoe_Scheduler_Model_Job) {
             throw new InvalidArgumentException(sprintf("Expected object of type 'Aoe_Scheduler_Model_Job' got '%s'", $object::class));
         }
 
         /** @var Aoe_Scheduler_Model_Job $object */
 
-        if (!empty($field)) {
+        if (! empty($field)) {
             throw new InvalidArgumentException('Aoe_Scheduler_Model_Resource_Job cannot load by any field except the job code.');
         }
 
@@ -88,11 +92,11 @@ class Aoe_Scheduler_Model_Resource_Job extends Mage_Core_Model_Resource_Db_Abstr
             return $this->delete($object);
         }
 
-        if (!$object instanceof Aoe_Scheduler_Model_Job) {
+        if (! $object instanceof Aoe_Scheduler_Model_Job) {
             throw new InvalidArgumentException(sprintf("Expected object of type 'Aoe_Scheduler_Model_Job' got '%s'", $object::class));
         }
 
-        if (!$object->getJobCode()) {
+        if (! $object->getJobCode()) {
             Mage::throwException('Invalid data. Must have job code.');
         }
 
@@ -129,20 +133,35 @@ class Aoe_Scheduler_Model_Resource_Job extends Mage_Core_Model_Resource_Db_Abstr
         foreach ($updateValues as $k => $v) {
             $adapter->update(
                 $this->getMainTable(),
-                ['value' => $v],
-                ['scope = ?'    => 'default', 'scope_id = ?' => 0, 'path = ?'     => $pathPrefix . $k]
+                [
+                    'value' => $v,
+                ],
+                [
+                    'scope = ?' => 'default',
+                    'scope_id = ?' => 0,
+                    'path = ?' => $pathPrefix . $k,
+                ]
             );
         }
         foreach ($insertValues as $k => $v) {
             $adapter->insert(
                 $this->getMainTable(),
-                ['scope'    => 'default', 'scope_id' => 0, 'path'     => $pathPrefix . $k, 'value'    => $v]
+                [
+                    'scope' => 'default',
+                    'scope_id' => 0,
+                    'path' => $pathPrefix . $k,
+                    'value' => $v,
+                ]
             );
         }
         foreach ($deleteValues as $k => $v) {
             $adapter->delete(
                 $this->getMainTable(),
-                ['scope = ?'    => 'default', 'scope_id = ?' => 0, 'path = ?'     => $pathPrefix . $k]
+                [
+                    'scope = ?' => 'default',
+                    'scope_id = ?' => 0,
+                    'path = ?' => $pathPrefix . $k,
+                ]
             );
         }
 
@@ -156,9 +175,6 @@ class Aoe_Scheduler_Model_Resource_Job extends Mage_Core_Model_Resource_Db_Abstr
         return $this;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function forsedSave(Mage_Core_Model_Abstract $object)
     {
         throw new RuntimeException('Method no longer exists');
@@ -171,20 +187,24 @@ class Aoe_Scheduler_Model_Resource_Job extends Mage_Core_Model_Resource_Db_Abstr
      */
     public function delete(Mage_Core_Model_Abstract $object)
     {
-        if (!$object instanceof Aoe_Scheduler_Model_Job) {
+        if (! $object instanceof Aoe_Scheduler_Model_Job) {
             throw new InvalidArgumentException(sprintf("Expected object of type 'Aoe_Scheduler_Model_Job' got '%s'", $object::class));
         }
 
         $this->_beforeDelete($object);
 
-        if (!$object->getJobCode()) {
+        if (! $object->getJobCode()) {
             Mage::throwException('Invalid data. Must have job code.');
         }
 
         $adapter = $this->_getWriteAdapter();
         $adapter->delete(
             $this->getMainTable(),
-            ['path LIKE ?' => $this->getJobSearchPath($object->getJobCode()), 'scope = ?' => 'default', 'scope_id = ?' => 0]
+            [
+                'path LIKE ?' => $this->getJobSearchPath($object->getJobCode()),
+                'scope = ?' => 'default',
+                'scope_id = ?' => 0,
+            ]
         );
 
         Mage::getConfig()->reinit();
@@ -207,7 +227,7 @@ class Aoe_Scheduler_Model_Resource_Job extends Mage_Core_Model_Resource_Db_Abstr
     private function getJobDataFromConfig($jobCode, $useDefaultScope = false, $default = null)
     {
         $config = Mage::getConfig()->getNode(($useDefaultScope ? 'default/' : '') . $this->getJobPathPrefix($jobCode));
-        if (!$config) {
+        if (! $config) {
             return [];
         }
 
@@ -303,7 +323,18 @@ class Aoe_Scheduler_Model_Resource_Job extends Mage_Core_Model_Resource_Db_Abstr
 
     public function getJobDataFromModel(Aoe_Scheduler_Model_Job $job)
     {
-        $values = ['name'                 => $job->getName(), 'description'          => $job->getDescription(), 'short_description'    => $job->getShortDescription(), 'run/model'            => $job->getRunModel(), 'schedule/config_path' => $job->getScheduleConfigPath(), 'schedule/cron_expr'   => $job->getScheduleCronExpr(), 'parameters'           => $job->getParameters(), 'groups'               => $job->getGroups(), 'is_active'            => ($job->getIsActive() ? '1' : '0'), 'on_success'           => $job->getOnSuccess()];
+        $values = [
+            'name' => $job->getName(),
+            'description' => $job->getDescription(),
+            'short_description' => $job->getShortDescription(),
+            'run/model' => $job->getRunModel(),
+            'schedule/config_path' => $job->getScheduleConfigPath(),
+            'schedule/cron_expr' => $job->getScheduleCronExpr(),
+            'parameters' => $job->getParameters(),
+            'groups' => $job->getGroups(),
+            'is_active' => ($job->getIsActive() ? '1' : '0'),
+            'on_success' => $job->getOnSuccess(),
+        ];
 
         // Strip out the auto-generated name
         if ($values['name'] === $job->getJobCode()) {

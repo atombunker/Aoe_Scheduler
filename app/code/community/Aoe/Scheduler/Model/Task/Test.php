@@ -8,12 +8,10 @@
  */
 class Aoe_Scheduler_Model_Task_Test
 {
-
     /**
      * General purpose test task.
      * Behavior can be controlled via parameters
      *
-     * @param Aoe_Scheduler_Model_Schedule $schedule
      * @return string
      * @throws Exception
      */
@@ -52,7 +50,6 @@ class Aoe_Scheduler_Model_Task_Test
         if ($parameters && $parameters['outcome'] == 'exception') {
             throw new Exception('This is a dummy exception');
         }
-
 
         // Simulating ETA;
 //        $starttime = time();

@@ -8,14 +8,13 @@
  */
 class Aoe_Scheduler_Helper_GracefulDead
 {
-
     /**
      * Configure graceful dead
      */
     public static function configure()
     {
         static $configured = false;
-        if (!$configured) {
+        if (! $configured) {
             register_shutdown_function(['Aoe_Scheduler_Helper_GracefulDead', 'beforeDyingShutdown']);
             if (extension_loaded('pcntl') && function_exists('pcntl_signal')) {
                 declare(ticks = 1);
@@ -28,7 +27,7 @@ class Aoe_Scheduler_Helper_GracefulDead
 
     public static function beforeDying($message = null, $exit = false)
     {
-        $schedule = Mage::registry('currently_running_schedule');  /* @var $schedule Aoe_Scheduler_Model_Schedule */
+        $schedule = Mage::registry('currently_running_schedule');  /** @var Aoe_Scheduler_Model_Schedule $schedule */
         if ($schedule !== null) {
             if ($message) {
                 $schedule->addMessages($message);

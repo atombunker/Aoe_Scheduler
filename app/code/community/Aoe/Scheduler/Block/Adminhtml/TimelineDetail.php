@@ -7,7 +7,6 @@
  */
 class Aoe_Scheduler_Block_Adminhtml_TimelineDetail extends Mage_Adminhtml_Block_Template
 {
-
     /**
      * @var string path to default template
      */
@@ -18,11 +17,9 @@ class Aoe_Scheduler_Block_Adminhtml_TimelineDetail extends Mage_Adminhtml_Block_
      */
     protected $schedule;
 
-
     /**
      * Set schedule
      *
-     * @param Aoe_Scheduler_Model_Schedule $schedule
      * @return Aoe_Scheduler_Block_Adminhtml_TimelineDetail
      */
     public function setSchedule(Aoe_Scheduler_Model_Schedule $schedule)
@@ -30,7 +27,6 @@ class Aoe_Scheduler_Block_Adminhtml_TimelineDetail extends Mage_Adminhtml_Block_
         $this->schedule = $schedule;
         return $this;
     }
-
 
     /**
      * Get schedule

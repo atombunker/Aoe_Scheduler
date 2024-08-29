@@ -8,8 +8,6 @@ class Aoe_Scheduler_Adminhtml_JobController extends Aoe_Scheduler_Controller_Abs
 {
     /**
      * Index action
-     *
-     * @return void
      */
     public function indexAction()
     {
@@ -21,8 +19,6 @@ class Aoe_Scheduler_Adminhtml_JobController extends Aoe_Scheduler_Controller_Abs
 
     /**
      * Mass action: disable
-     *
-     * @return void
      */
     public function disableAction()
     {
@@ -34,7 +30,7 @@ class Aoe_Scheduler_Adminhtml_JobController extends Aoe_Scheduler_Controller_Abs
                 $job->setIsActive(false)->save();
                 $this->_getSession()->addSuccess($this->__('Disabled "%s"', $code));
 
-                /* @var Aoe_Scheduler_Model_ScheduleManager $scheduleManager */
+                /** @var Aoe_Scheduler_Model_ScheduleManager $scheduleManager */
                 $scheduleManager = Mage::getModel('aoe_scheduler/scheduleManager');
                 $scheduleManager->flushSchedules($job->getJobCode());
                 $this->_getSession()->addNotice($this->__('Pending schedules for "%s" have been flushed.', $job->getJobCode()));
@@ -45,8 +41,6 @@ class Aoe_Scheduler_Adminhtml_JobController extends Aoe_Scheduler_Controller_Abs
 
     /**
      * Mass action: enable
-     *
-     * @return void
      */
     public function enableAction()
     {
@@ -54,11 +48,11 @@ class Aoe_Scheduler_Adminhtml_JobController extends Aoe_Scheduler_Controller_Abs
         foreach ($codes as $code) {
             /** @var Aoe_Scheduler_Model_Job $job */
             $job = Mage::getModel('aoe_scheduler/job')->load($code);
-            if ($job->getJobCode() && !$job->getIsActive()) {
+            if ($job->getJobCode() && ! $job->getIsActive()) {
                 $job->setIsActive(true)->save();
                 $this->_getSession()->addSuccess($this->__('Enabled "%s"', $code));
 
-                /* @var Aoe_Scheduler_Model_ScheduleManager $scheduleManager */
+                /** @var Aoe_Scheduler_Model_ScheduleManager $scheduleManager */
                 $scheduleManager = Mage::getModel('aoe_scheduler/scheduleManager');
                 $scheduleManager->generateSchedulesForJob($job);
                 $this->_getSession()->addNotice($this->__('Job "%s" has been scheduled.', $job->getJobCode()));
@@ -69,8 +63,6 @@ class Aoe_Scheduler_Adminhtml_JobController extends Aoe_Scheduler_Controller_Abs
 
     /**
      * Mass action: schedule now
-     *
-     * @return void
      */
     public function scheduleNowAction()
     {
@@ -89,12 +81,10 @@ class Aoe_Scheduler_Adminhtml_JobController extends Aoe_Scheduler_Controller_Abs
 
     /**
      * Mass action: run now
-     *
-     * @return void
      */
     public function runNowAction()
     {
-        if (!Mage::getStoreConfig('system/cron/enableRunNow')) {
+        if (! Mage::getStoreConfig('system/cron/enableRunNow')) {
             Mage::throwException("'Run now' disabled by configuration (system/cron/enableRunNow)");
         }
         $codes = $this->getMassActionCodes();
@@ -138,7 +128,7 @@ class Aoe_Scheduler_Adminhtml_JobController extends Aoe_Scheduler_Controller_Abs
     protected function getMassActionCodes($key = 'codes')
     {
         $codes = $this->getRequest()->getParam($key);
-        if (!is_array($codes)) {
+        if (! is_array($codes)) {
             return [];
         }
         $allowedCodes = Mage::getSingleton('aoe_scheduler/job')->getResource()->getJobCodes();
@@ -174,12 +164,12 @@ class Aoe_Scheduler_Adminhtml_JobController extends Aoe_Scheduler_Controller_Abs
     protected function _validatePostData($data)
     {
         try {
-            /* @var Aoe_Scheduler_Helper_Data $helper */
+            /** @var Aoe_Scheduler_Helper_Data $helper */
             $helper = Mage::helper('aoe_scheduler');
             $helper->getCallBack($data['run_model']);
-            if (!empty($data['schedule_cron_expr'])) {
-                if (!$helper->validateCronExpression($data['schedule_cron_expr'])) {
-                    Mage::throwException("Invalid cron expression");
+            if (! empty($data['schedule_cron_expr'])) {
+                if (! $helper->validateCronExpression($data['schedule_cron_expr'])) {
+                    Mage::throwException('Invalid cron expression');
                 }
             }
         } catch (Exception $e) {
@@ -192,7 +182,6 @@ class Aoe_Scheduler_Adminhtml_JobController extends Aoe_Scheduler_Controller_Abs
 
     /**
      * Save action
-     *
      */
     public function saveAction()
     {
@@ -201,8 +190,11 @@ class Aoe_Scheduler_Adminhtml_JobController extends Aoe_Scheduler_Controller_Abs
             $job = $this->_initJob();
             $job->addData($data);
             //validating
-            if (!$this->_validatePostData($data)) {
-                $this->_redirect('*/*/edit', ['job_code' => $job->getJobCode(), '_current' => true]);
+            if (! $this->_validatePostData($data)) {
+                $this->_redirect('*/*/edit', [
+                    'job_code' => $job->getJobCode(),
+                    '_current' => true,
+                ]);
                 return;
             }
 
@@ -218,11 +210,14 @@ class Aoe_Scheduler_Adminhtml_JobController extends Aoe_Scheduler_Controller_Abs
                 $this->_getSession()->setFormData(false);
                 // check if 'Save and Continue'
                 if ($this->getRequest()->getParam('back', false)) {
-                    $this->_redirect('*/*/edit', ['job_code' => $job->getJobCode(), '_current' => true]);
+                    $this->_redirect('*/*/edit', [
+                        'job_code' => $job->getJobCode(),
+                        '_current' => true,
+                    ]);
                     return;
                 }
 
-                /* @var $scheduleManager Aoe_Scheduler_Model_ScheduleManager */
+                /** @var Aoe_Scheduler_Model_ScheduleManager $scheduleManager */
                 $scheduleManager = Mage::getModel('aoe_scheduler/scheduleManager');
                 $scheduleManager->flushSchedules($job->getJobCode());
                 $scheduleManager->generateSchedulesForJob($job);
@@ -241,16 +236,19 @@ class Aoe_Scheduler_Adminhtml_JobController extends Aoe_Scheduler_Controller_Abs
             }
 
             $this->_getSession()->setFormData($data);
-            $this->_redirect('*/*/edit', ['job_code' => $this->getRequest()->getParam('job_code')]);
+            $this->_redirect('*/*/edit', [
+                'job_code' => $this->getRequest()->getParam('job_code'),
+            ]);
             return;
         }
 
-        $this->_redirect('*/*/', ['_current' => true]);
+        $this->_redirect('*/*/', [
+            '_current' => true,
+        ]);
     }
 
     /**
      * Delete Action
-     *
      */
     public function deleteAction()
     {
@@ -259,7 +257,7 @@ class Aoe_Scheduler_Adminhtml_JobController extends Aoe_Scheduler_Controller_Abs
             $job->delete();
             $this->_getSession()->addSuccess($this->__('The job has been deleted.'));
 
-            /* @var Aoe_Scheduler_Model_ScheduleManager $scheduleManager */
+            /** @var Aoe_Scheduler_Model_ScheduleManager $scheduleManager */
             $scheduleManager = Mage::getModel('aoe_scheduler/scheduleManager');
             $scheduleManager->flushSchedules($job->getJobCode());
             $this->_getSession()->addNotice($this->__('Pending schedules for "%s" have been flushed.', $job->getJobCode()));

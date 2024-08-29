@@ -3,10 +3,15 @@
 class Aoe_Scheduler_Model_Resource_Job_Collection extends Varien_Data_Collection
 {
     protected $model;
+
     protected $resourceModel;
+
     protected $whiteList = [];
+
     protected $blackList = [];
+
     protected $activeOnly = false;
+
     protected $dbOnly = false;
 
     public function __construct()
@@ -21,7 +26,7 @@ class Aoe_Scheduler_Model_Resource_Job_Collection extends Varien_Data_Collection
     public function getResource()
     {
         $resource = Mage::getResourceSingleton($this->resourceModel);
-        if (!$resource instanceof Aoe_Scheduler_Model_Resource_Job) {
+        if (! $resource instanceof Aoe_Scheduler_Model_Resource_Job) {
             Mage::throwException(
                 sprintf(
                     'Invalid resource class. Expected "%s" and received "%s".',
@@ -42,7 +47,7 @@ class Aoe_Scheduler_Model_Resource_Job_Collection extends Varien_Data_Collection
     {
         $model = Mage::getModel($this->model);
 
-        if (!$model instanceof Aoe_Scheduler_Model_Job) {
+        if (! $model instanceof Aoe_Scheduler_Model_Job) {
             Mage::throwException(
                 sprintf(
                     'Invalid model class. Expected "%s" and received "%s".',
@@ -69,18 +74,18 @@ class Aoe_Scheduler_Model_Resource_Job_Collection extends Varien_Data_Collection
         $this->clear();
 
         foreach ($this->getResource()->getJobCodes() as $jobCode) {
-            if (!empty($this->whiteList) && !in_array($jobCode, $this->whiteList)) {
+            if (! empty($this->whiteList) && ! in_array($jobCode, $this->whiteList)) {
                 continue;
             }
-            if (!empty($this->blackList) && in_array($jobCode, $this->blackList)) {
+            if (! empty($this->blackList) && in_array($jobCode, $this->blackList)) {
                 continue;
             }
 
             $job = $this->getNewEmptyItem()->load($jobCode);
-            if ($this->activeOnly && !$job->getIsActive()) {
+            if ($this->activeOnly && ! $job->getIsActive()) {
                 continue;
             }
-            if ($this->dbOnly && !$job->isDbOnly()) {
+            if ($this->dbOnly && ! $job->isDbOnly()) {
                 continue;
             }
 
@@ -157,7 +162,7 @@ class Aoe_Scheduler_Model_Resource_Job_Collection extends Varien_Data_Collection
      */
     public function setActiveOnly($flag = true)
     {
-        $flag = (bool)$flag;
+        $flag = (bool) $flag;
         if ($this->activeOnly !== $flag) {
             $this->clear();
             $this->activeOnly = $flag;
@@ -180,7 +185,7 @@ class Aoe_Scheduler_Model_Resource_Job_Collection extends Varien_Data_Collection
      */
     public function setDbOnly($flag = true)
     {
-        $flag = (bool)$flag;
+        $flag = (bool) $flag;
         if ($this->dbOnly !== $flag) {
             $this->clear();
             $this->dbOnly = $flag;
@@ -197,7 +202,7 @@ class Aoe_Scheduler_Model_Resource_Job_Collection extends Varien_Data_Collection
      */
     public function addItem(Varien_Object $item)
     {
-        if (!$item instanceof Aoe_Scheduler_Model_Job) {
+        if (! $item instanceof Aoe_Scheduler_Model_Job) {
             Mage::throwException(
                 sprintf(
                     'Invalid model class. Expected "%s" and received "%s".',
@@ -208,7 +213,7 @@ class Aoe_Scheduler_Model_Resource_Job_Collection extends Varien_Data_Collection
         }
 
         $jobCode = $item->getJobCode();
-        if (!$jobCode) {
+        if (! $jobCode) {
             Mage::throwException('Jobs must have a job code');
         }
 
@@ -286,7 +291,6 @@ class Aoe_Scheduler_Model_Resource_Job_Collection extends Varien_Data_Collection
     /**
      * Setting data for all collection items
      *
-     *
      * @return  $this
      */
     public function setDataToAll(mixed $key, mixed $value = null)
@@ -316,7 +320,6 @@ class Aoe_Scheduler_Model_Resource_Job_Collection extends Varien_Data_Collection
         return $this->_toOptionHash($valueField, $labelField);
     }
 
-
     /**
      * Convert items array to array for select options
      *
@@ -343,7 +346,6 @@ class Aoe_Scheduler_Model_Resource_Job_Collection extends Varien_Data_Collection
         return $options;
     }
 
-
     /**
      * Convert items array to hash for select options
      *
@@ -361,5 +363,4 @@ class Aoe_Scheduler_Model_Resource_Job_Collection extends Varien_Data_Collection
         }
         return $res;
     }
-
 }

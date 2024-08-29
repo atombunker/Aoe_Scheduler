@@ -8,8 +8,8 @@
  */
 class Aoe_Scheduler_Model_ProcessManager
 {
-
     const XML_PATH_MARK_AS_ERROR = 'system/cron/mark_as_error_after';
+
     const XML_PATH_MAX_JOB_RUNTIME = 'system/cron/max_job_runtime';
 
     /**
@@ -22,7 +22,7 @@ class Aoe_Scheduler_Model_ProcessManager
     {
         $collection = Mage::getModel('cron/schedule')->getCollection();
         $collection->addFieldToFilter('status', Aoe_Scheduler_Model_Schedule::STATUS_RUNNING);
-        if (!is_null($host)) {
+        if ($host !== null) {
             $collection->addFieldToFilter('host', $host);
         }
         return $collection;
@@ -37,7 +37,9 @@ class Aoe_Scheduler_Model_ProcessManager
     public function getAllKillRequests($host = null)
     {
         $collection = $this->getAllRunningSchedules($host);
-        $collection->addFieldToFilter('kill_request', ['lt' => strftime('%Y-%m-%d %H:%M:00', time()+60)]);
+        $collection->addFieldToFilter('kill_request', [
+            'lt' => strftime('%Y-%m-%d %H:%M:00', time() + 60),
+        ]);
         return $collection;
     }
 
@@ -54,10 +56,12 @@ class Aoe_Scheduler_Model_ProcessManager
             ->getCollection()
             ->addFieldToFilter('status', Aoe_Scheduler_Model_Schedule::STATUS_RUNNING)
             ->addFieldToFilter('job_code', $jobCode);
-        if (!is_null($ignoreId)) {
-            $collection->addFieldToFilter('schedule_id', ['neq' => $ignoreId]);
+        if ($ignoreId !== null) {
+            $collection->addFieldToFilter('schedule_id', [
+                'neq' => $ignoreId,
+            ]);
         }
-        foreach ($collection as $schedule) { /* @var $schedule Aoe_Scheduler_Model_Schedule */
+        foreach ($collection as $schedule) { /** @var Aoe_Scheduler_Model_Schedule $schedule */
             $alive = $schedule->isAlive();
             if ($alive !== false) { // TODO: how do we handle null (= we don't know because might be running on a different server?
                 return true;
@@ -66,21 +70,18 @@ class Aoe_Scheduler_Model_ProcessManager
         return false;
     }
 
-
     /**
      * Check running jobs
-     *
-     * @return void
      */
     public function checkRunningJobs()
     {
         $maxJobRuntime = intval(Mage::getStoreConfig(self::XML_PATH_MAX_JOB_RUNTIME));
 
         if ($maxJobRuntime) {
-            foreach ($this->getAllRunningSchedules(gethostname()) as $schedule) { /* @var $schedule Aoe_Scheduler_Model_Schedule */
+            foreach ($this->getAllRunningSchedules(gethostname()) as $schedule) { /** @var Aoe_Scheduler_Model_Schedule $schedule */
                 // checking if the job isn't running too long
                 if ($schedule->isAlive()) {
-                    if ($schedule->getDuration() > $maxJobRuntime * 60 && !$schedule->getKillRequest()) {
+                    if ($schedule->getDuration() > $maxJobRuntime * 60 && ! $schedule->getKillRequest()) {
                         $schedule->requestKill(null, 'Kill requested because job exceeded the max job runtime of ' . $maxJobRuntime . ' minutes.');
                     }
                 }
@@ -92,12 +93,14 @@ class Aoe_Scheduler_Model_ProcessManager
         $markAsErrorAfter = intval(Mage::getStoreConfig(self::XML_PATH_MARK_AS_ERROR));
         $maxAge = time() - ($markAsErrorAfter > 0 ? $markAsErrorAfter : 5 ) * 60;
         if ($markAsErrorAfter) {
-            $schedules = Mage::getModel('cron/schedule')->getCollection()/* @var $schedules Mage_Cron_Model_Resource_Schedule_Collection */
-            ->addFieldToFilter('status', Aoe_Scheduler_Model_Schedule::STATUS_RUNNING)
-                ->addFieldToFilter('last_seen', ['lt' => strftime('%Y-%m-%d %H:%M:00', $maxAge)])
+            $schedules = Mage::getModel('cron/schedule')->getCollection()/** @var Mage_Cron_Model_Resource_Schedule_Collection $schedules */
+                ->addFieldToFilter('status', Aoe_Scheduler_Model_Schedule::STATUS_RUNNING)
+                ->addFieldToFilter('last_seen', [
+                    'lt' => strftime('%Y-%m-%d %H:%M:00', $maxAge),
+                ])
                 ->load();
 
-            foreach ($schedules as $schedule) { /* @var $schedule Aoe_Scheduler_Model_Schedule */
+            foreach ($schedules as $schedule) { /** @var Aoe_Scheduler_Model_Schedule $schedule */
                 // check one more time
                 if ($schedule->isAlive() !== true) {
                     $schedule->markAsDisappeared(sprintf('Host "%s" has not been available for a while now to update the status of this task and the task is not reporting back by itself', $schedule->getHost()));
@@ -108,15 +111,23 @@ class Aoe_Scheduler_Model_ProcessManager
 
         // clean up "running"(!?) tasks that have never been seen (for whatever reason) and have been scheduled before maxAge
         // by robinfritze. @see https://github.com/AOEpeople/Aoe_Scheduler/issues/40#issuecomment-67749476
-        $schedules = Mage::getModel('cron/schedule')->getCollection() /* @var $schedules Mage_Cron_Model_Resource_Schedule_Collection */
+        $schedules = Mage::getModel('cron/schedule')->getCollection() /** @var Mage_Cron_Model_Resource_Schedule_Collection $schedules */
             ->addFieldToFilter('status', Aoe_Scheduler_Model_Schedule::STATUS_RUNNING)
-            ->addFieldToFilter('last_seen', ['null' => true])
-            ->addFieldToFilter('host', ['null' => true])
-            ->addFieldToFilter('pid', ['null' => true])
-            ->addFieldToFilter('scheduled_at', ['lt' => strftime('%Y-%m-%d %H:%M:00', $maxAge)])
+            ->addFieldToFilter('last_seen', [
+                'null' => true,
+            ])
+            ->addFieldToFilter('host', [
+                'null' => true,
+            ])
+            ->addFieldToFilter('pid', [
+                'null' => true,
+            ])
+            ->addFieldToFilter('scheduled_at', [
+                'lt' => strftime('%Y-%m-%d %H:%M:00', $maxAge),
+            ])
             ->load();
 
-        foreach ($schedules->getIterator() as $schedule) { /* @var $schedule Aoe_Scheduler_Model_Schedule */
+        foreach ($schedules->getIterator() as $schedule) { /** @var Aoe_Scheduler_Model_Schedule $schedule */
             $schedule->setLastSeen(strftime('%Y-%m-%d %H:%M:%S', time()));
             $schedule->markAsDisappeared(sprintf('Process "%s" (id: %s) cannot be found anymore', $schedule->getJobCode(), $schedule->getId()));
         }
@@ -127,16 +138,26 @@ class Aoe_Scheduler_Model_ProcessManager
          * - and have never been scheduled (f.e. triggered by n98-magerun sys:cron:run) and failed
          * - and have been created before maxAge
          */
-        $schedules = Mage::getModel('cron/schedule')->getCollection() /* @var $schedules Mage_Cron_Model_Resource_Schedule_Collection */
+        $schedules = Mage::getModel('cron/schedule')->getCollection() /** @var Mage_Cron_Model_Resource_Schedule_Collection $schedules */
             ->addFieldToFilter('status', Aoe_Scheduler_Model_Schedule::STATUS_RUNNING)
-            ->addFieldToFilter('last_seen', ['null' => true])
-            ->addFieldToFilter('host', ['null' => true])
-            ->addFieldToFilter('pid', ['null' => true])
-            ->addFieldToFilter('scheduled_at', ['null' => true])
-            ->addFieldToFilter('created_at', ['lt' => strftime('%Y-%m-%d %H:%M:00', $maxAge)])
+            ->addFieldToFilter('last_seen', [
+                'null' => true,
+            ])
+            ->addFieldToFilter('host', [
+                'null' => true,
+            ])
+            ->addFieldToFilter('pid', [
+                'null' => true,
+            ])
+            ->addFieldToFilter('scheduled_at', [
+                'null' => true,
+            ])
+            ->addFieldToFilter('created_at', [
+                'lt' => strftime('%Y-%m-%d %H:%M:00', $maxAge),
+            ])
             ->load();
 
-        foreach ($schedules->getIterator() as $schedule) { /* @var $schedule Aoe_Scheduler_Model_Schedule */
+        foreach ($schedules->getIterator() as $schedule) { /** @var Aoe_Scheduler_Model_Schedule $schedule */
             $schedule->setLastSeen(strftime('%Y-%m-%d %H:%M:%S', time()));
             $schedule->markAsDisappeared(sprintf('Process "%s" (id: %s) cannot be found anymore', $schedule->getJobCode(), $schedule->getId()));
         }
@@ -145,16 +166,13 @@ class Aoe_Scheduler_Model_ProcessManager
 
     /**
      * Process kill requests
-     *
-     * @return void
      */
     public function processKillRequests()
     {
-        foreach ($this->getAllKillRequests(gethostname()) as $schedule) { /* @var $schedule Aoe_Scheduler_Model_Schedule */
+        foreach ($this->getAllKillRequests(gethostname()) as $schedule) { /** @var Aoe_Scheduler_Model_Schedule $schedule */
             $schedule->kill();
         }
     }
-
 
     /**
      * Run maintenance

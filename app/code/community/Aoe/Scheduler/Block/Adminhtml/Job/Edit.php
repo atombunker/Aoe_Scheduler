@@ -7,7 +7,6 @@
  */
 class Aoe_Scheduler_Block_Adminhtml_Job_Edit extends Mage_Adminhtml_Block_Widget_Form_Container
 {
-
     public function __construct()
     {
         parent::__construct();
@@ -19,10 +18,6 @@ class Aoe_Scheduler_Block_Adminhtml_Job_Edit extends Mage_Adminhtml_Block_Widget
         $this->removeButton('reset');
     }
 
-    /**
-     * Internal constructor
-     *
-     */
     protected function _construct()
     {
         parent::_construct();
@@ -41,7 +36,6 @@ class Aoe_Scheduler_Block_Adminhtml_Job_Edit extends Mage_Adminhtml_Block_Widget
         return Mage::registry('current_job_instance');
     }
 
-
     /**
      * Return translated header text depending on creating/editing action
      *
@@ -51,9 +45,9 @@ class Aoe_Scheduler_Block_Adminhtml_Job_Edit extends Mage_Adminhtml_Block_Widget
     {
         if ($this->getJob()->getId()) {
             return $this->__('Job "%s"', $this->escapeHtml($this->getJob()->getJobCode()));
-        } else {
+        }  
             return $this->__('New Job');
-        }
+
     }
 
     /**
@@ -63,6 +57,9 @@ class Aoe_Scheduler_Block_Adminhtml_Job_Edit extends Mage_Adminhtml_Block_Widget
      */
     public function getSaveUrl()
     {
-        return $this->getUrl('*/*/save', ['_current'=>true, 'back'=>null]);
+        return $this->getUrl('*/*/save', [
+            '_current' => true,
+            'back' => null,
+        ]);
     }
 }

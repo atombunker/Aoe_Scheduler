@@ -1,11 +1,18 @@
 <?php
-/* @var $this Mage_Core_Model_Resource_Setup */
+
+/** @var Mage_Core_Model_Resource_Setup $this */
 $this->startSetup();
 
 $this->getConnection()->modifyColumn(
     $this->getTable('cron/schedule'),
     'status',
-    ['type'      => Varien_Db_Ddl_Table::TYPE_TEXT, 'length'    => 30, 'nullable'  => false, 'default'   => 'pending', 'comment'   => 'Status']
+    [
+        'type' => Varien_Db_Ddl_Table::TYPE_TEXT,
+        'length' => 30,
+        'nullable' => false,
+        'default' => 'pending',
+        'comment' => 'Status',
+    ]
 );
 
 $this->endSetup();

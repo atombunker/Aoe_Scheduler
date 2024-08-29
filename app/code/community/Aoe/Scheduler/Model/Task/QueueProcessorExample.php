@@ -8,11 +8,9 @@
  */
 class Aoe_Scheduler_Model_Task_QueueProcessorExample
 {
-
     /**
      * Run
      *
-     * @param Aoe_Scheduler_Model_Schedule $schedule
      * @return string
      * @throws Exception
      */
@@ -42,7 +40,7 @@ class Aoe_Scheduler_Model_Task_QueueProcessorExample
             // [...]
             $sqsClient->deleteMessage([
                 'QueueUrl' => $queueUrl,
-                'ReceiptHandle' => $message['ReceiptHandle']
+                'ReceiptHandle' => $message['ReceiptHandle'],
             ]);
         }
 

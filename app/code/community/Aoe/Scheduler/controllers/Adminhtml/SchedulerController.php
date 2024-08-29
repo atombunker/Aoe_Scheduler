@@ -8,8 +8,6 @@ class Aoe_Scheduler_Adminhtml_SchedulerController extends Aoe_Scheduler_Controll
 {
     /**
      * Index action
-     *
-     * @return void
      */
     public function indexAction()
     {
@@ -21,8 +19,6 @@ class Aoe_Scheduler_Adminhtml_SchedulerController extends Aoe_Scheduler_Controll
 
     /**
      * Mass action: delete
-     *
-     * @return void
      */
     public function deleteAction()
     {
@@ -41,14 +37,12 @@ class Aoe_Scheduler_Adminhtml_SchedulerController extends Aoe_Scheduler_Controll
 
     /**
      * Mass action: kill
-     *
-     * @return void
      */
     public function killAction()
     {
         $ids = $this->getRequest()->getParam('schedule_ids');
         foreach ($ids as $id) {
-            $schedule = Mage::getModel('cron/schedule'); /* @var $schedule Aoe_Scheduler_Model_Schedule */
+            $schedule = Mage::getModel('cron/schedule'); /** @var Aoe_Scheduler_Model_Schedule $schedule */
             $schedule->load($id)->requestKill();
         }
         $message = $this->__('Kill requests saved for task(s) "%s" (will be killed via cron)', implode(', ', $ids));

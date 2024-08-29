@@ -7,11 +7,10 @@
  */
 abstract class Aoe_Scheduler_Controller_AbstractController extends Mage_Adminhtml_Controller_Action
 {
-
     public function preDispatch()
     {
         parent::preDispatch();
-        if ($this->getRequest()->getActionName() != 'error' && !$this->checkLocalCodePool()) {
+        if ($this->getRequest()->getActionName() != 'error' && ! $this->checkLocalCodePool()) {
             $this->_forward('error');
         }
     }
@@ -30,7 +29,7 @@ abstract class Aoe_Scheduler_Controller_AbstractController extends Mage_Adminhtm
      */
     protected function _initAction()
     {
-        if (!Mage::getStoreConfigFlag('system/cron/enable')) {
+        if (! Mage::getStoreConfigFlag('system/cron/enable')) {
             $this->_getSession()->addNotice($this->__('Scheduler is disabled in configuration (system/cron/enable). No schedules will be executed.'));
         } else {
             $this->checkHeartbeat();
@@ -38,7 +37,9 @@ abstract class Aoe_Scheduler_Controller_AbstractController extends Mage_Adminhtm
 
         // check configuration
         if (Mage::getStoreConfig('system/cron/schedule_generate_every') > Mage::getStoreConfig('system/cron/schedule_ahead_for')) {
-            $this->_getSession()->addError($this->__('Configuration problem. "Generate Schedules Every" is higher than "Schedule Ahead for". Please check your <a href="%s">configuration settings</a>.', $this->getUrl('adminhtml/system_config/edit', ['section' => 'system']) . '#system_cron'));
+            $this->_getSession()->addError($this->__('Configuration problem. "Generate Schedules Every" is higher than "Schedule Ahead for". Please check your <a href="%s">configuration settings</a>.', $this->getUrl('adminhtml/system_config/edit', [
+                'section' => 'system',
+            ]) . '#system_cron'));
         }
 
         // Check the cron is being run as the configured user and whether or not to show the message
@@ -59,7 +60,7 @@ abstract class Aoe_Scheduler_Controller_AbstractController extends Mage_Adminhtm
      */
     protected function checkLocalCodePool()
     {
-        $helper = Mage::helper('aoe_scheduler/compatibility'); /* @var $helper Aoe_Scheduler_Helper_Compatibility */
+        $helper = Mage::helper('aoe_scheduler/compatibility'); /** @var Aoe_Scheduler_Helper_Compatibility $helper */
         if ($helper->oldConfigXmlExists()) {
             $this->_getSession()->addError($this->__('Looks like you have an older version of Aoe_Scheduler installed that lived in the local code pool. Please delete everything under "%s"', $helper->getLocalCodeDir()));
             return false;
@@ -72,7 +73,7 @@ abstract class Aoe_Scheduler_Controller_AbstractController extends Mage_Adminhtm
      */
     protected function checkHeartbeat()
     {
-        if (!Mage::helper('aoe_scheduler')->isDisabled('aoescheduler_heartbeat')) {
+        if (! Mage::helper('aoe_scheduler')->isDisabled('aoescheduler_heartbeat')) {
             $lastHeartbeat = Mage::helper('aoe_scheduler')->getLastHeartbeat();
             if ($lastHeartbeat === false) {
                 // no heartbeat task found
@@ -94,28 +95,29 @@ abstract class Aoe_Scheduler_Controller_AbstractController extends Mage_Adminhtm
 
     /**
      * Check the user running the cron matches the configured user, and if not prevented, display a warning message with some CTAs
-     * @return void
      */
     protected function _checkCronUser()
     {
 
-        $helper = Mage::helper('aoe_scheduler'); /* @var $helper Aoe_Scheduler_Helper_Data */
+        $helper = Mage::helper('aoe_scheduler'); /** @var Aoe_Scheduler_Helper_Data $helper */
 
         // If opted out of the message, don't show it
-        if (!$helper->getShowUserCronMessage()) {
+        if (! $helper->getShowUserCronMessage()) {
             return;
         }
 
-        if (!$helper->runningAsConfiguredUser(false)) {
+        if (! $helper->runningAsConfiguredUser(false)) {
             $configuredUser = $helper->getConfiguredUser();
-            if (!empty($configuredUser)) {
+            if (! empty($configuredUser)) {
                 // User is configured and doesn't match
                 $this->_getSession()->addError(
                     $this->__(
                         'Scheduler appears to be running as system user "%s". It should be running as "%s". <a href="%s">Use %s</a>.%s <a href="%s">Don\'t show this again.</a>',
                         $helper->getLastRunUser(),
                         $configuredUser,
-                        $this->getUrl('adminhtml/scheduler/setConfiguredUser', ['user' => $helper->getLastRunUser()]),
+                        $this->getUrl('adminhtml/scheduler/setConfiguredUser', [
+                            'user' => $helper->getLastRunUser(),
+                        ]),
                         $helper->getLastRunUser(),
                         ($helper->getShouldKillOnWrongUser()) ? ' <b>Warning!</b> Jobs will not run until this is resolved!.' : '',
                         $this->getUrl('adminhtml/scheduler/hideUserWarning')
@@ -127,26 +129,26 @@ abstract class Aoe_Scheduler_Controller_AbstractController extends Mage_Adminhtm
                     $this->__(
                         'No default user is configured for who should run the cron. <a href="%s">Click here</a> to define one. We suggest '
                         . 'using "%s". <a href="%s">Don\'t show this again.</a>',
-                        $this->getUrl('adminhtml/system_config/edit', ['section' => 'system']) . '#system_cron',
+                        $this->getUrl('adminhtml/system_config/edit', [
+                            'section' => 'system',
+                        ]) . '#system_cron',
                         $helper->getRunningUser(), // suggest the user that runs the web server, makes sense
                         $this->getUrl('adminhtml/scheduler/hideUserWarning')
                     )
                 );
             }
-            
+
         }
     }
 
     /**
      * Generate schedule now
-     *
-     * @return void
      */
     public function generateScheduleAction()
     {
         Mage::app()->removeCache(Mage_Cron_Model_Observer::CACHE_KEY_LAST_SCHEDULE_GENERATE_AT);
 
-        /* @var Aoe_Scheduler_Model_ScheduleManager $scheduleManager */
+        /** @var Aoe_Scheduler_Model_ScheduleManager $scheduleManager */
         $scheduleManager = Mage::getModel('aoe_scheduler/scheduleManager');
         $scheduleManager->generateSchedules();
 

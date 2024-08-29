@@ -2,20 +2,16 @@
 
 class SchedulingTest extends AbstractTest
 {
-
-    /**
-     * @test
-     */
-    public function generateSchedule()
+    public function testGenerateSchedule()
     {
-        $scheduleManager = Mage::getModel('aoe_scheduler/scheduleManager'); /* @var Aoe_Scheduler_Model_ScheduleManager $scheduleManager */
+        $scheduleManager = Mage::getModel('aoe_scheduler/scheduleManager'); /** @var Aoe_Scheduler_Model_ScheduleManager $scheduleManager */
 
         $scheduleManager->deleteAll();
         $collection = Mage::getModel('cron/schedule')->getCollection();
         $this->assertCount(0, $collection);
 
         $scheduleManager->generateSchedules();
-        $collection = Mage::getModel('cron/schedule')->getCollection(); /* @var $collection Mage_Cron_Model_Resource_Schedule_Collection */
+        $collection = Mage::getModel('cron/schedule')->getCollection(); /** @var Mage_Cron_Model_Resource_Schedule_Collection $collection */
         $this->assertGreaterThan(0, $collection->count());
 
         $scheduleManager->deleteAll();
@@ -24,20 +20,19 @@ class SchedulingTest extends AbstractTest
     }
 
     /**
-     * @param $runCronCallBack callable
+     * @param callable $runCronCallBack
      * @dataProvider runCronDefaultProvider
-     * @test
      */
-    public function scheduleJobAndRunCron($runCronCallBack)
+    public function testScheduleJobAndRunCron($runCronCallBack)
     {
         // delete all schedules
-        $scheduleManager = Mage::getModel('aoe_scheduler/scheduleManager'); /* @var Aoe_Scheduler_Model_ScheduleManager $scheduleManager */
+        $scheduleManager = Mage::getModel('aoe_scheduler/scheduleManager'); /** @var Aoe_Scheduler_Model_ScheduleManager $scheduleManager */
         $scheduleManager->deleteAll();
 
         // fake schedule generation to avoid it to be generated on the next run:
         Mage::app()->saveCache(time(), Mage_Cron_Model_Observer::CACHE_KEY_LAST_SCHEDULE_GENERATE_AT, ['crontab'], null);
 
-        $schedule = Mage::getModel('cron/schedule'); /* @var $schedule Aoe_Scheduler_Model_Schedule */
+        $schedule = Mage::getModel('cron/schedule'); /** @var Aoe_Scheduler_Model_Schedule $schedule */
         $jobCode = 'aoescheduler_testtask';
         $schedule->setJobCode($jobCode);
         $schedule->schedule();
@@ -47,7 +42,7 @@ class SchedulingTest extends AbstractTest
         $this->assertGreaterThan(0, intval($scheduleId));
 
         // check for pending status
-        $loadedSchedule = Mage::getModel('cron/schedule')->load($scheduleId); /* @var Aoe_Scheduler_Model_Schedule $loadedSchedule */
+        $loadedSchedule = Mage::getModel('cron/schedule')->load($scheduleId); /** @var Aoe_Scheduler_Model_Schedule $loadedSchedule */
         $this->assertEquals($scheduleId, $loadedSchedule->getId());
         $this->assertEquals(Aoe_Scheduler_Model_Schedule::STATUS_PENDING, $loadedSchedule->getStatus());
 
@@ -55,7 +50,7 @@ class SchedulingTest extends AbstractTest
         $runCronCallBack();
 
         // check for success status
-        $loadedSchedule = Mage::getModel('cron/schedule')->load($scheduleId); /* @var Aoe_Scheduler_Model_Schedule $loadedSchedule */
+        $loadedSchedule = Mage::getModel('cron/schedule')->load($scheduleId); /** @var Aoe_Scheduler_Model_Schedule $loadedSchedule */
         $this->assertEquals($scheduleId, $loadedSchedule->getId());
         $this->assertEquals(Aoe_Scheduler_Model_Schedule::STATUS_SUCCESS, $loadedSchedule->getStatus());
     }

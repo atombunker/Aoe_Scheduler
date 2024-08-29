@@ -7,7 +7,6 @@
  */
 class Aoe_Scheduler_Block_Adminhtml_Timeline extends Mage_Adminhtml_Block_Widget_Container
 {
-
     /**
      * @var int amount of seconds per pixel
      */
@@ -28,19 +27,12 @@ class Aoe_Scheduler_Block_Adminhtml_Timeline extends Mage_Adminhtml_Block_Widget
      */
     protected $schedules = [];
 
-
-    /**
-     * Constructor
-     *
-     * @return void
-     */
     protected function _construct()
     {
         $this->_headerText = $this->__('Scheduler Timeline');
         $this->loadSchedules();
         parent::_construct();
     }
-
 
     /**
      * Prepare layout
@@ -50,11 +42,18 @@ class Aoe_Scheduler_Block_Adminhtml_Timeline extends Mage_Adminhtml_Block_Widget
     protected function _prepareLayout()
     {
         $this->removeButton('add');
-        $this->_addButton('add_new', ['label' => $this->__('Generate Schedule'), 'onclick' => "setLocation('{$this->getUrl('*/*/generateSchedule')}')"]);
-        $this->_addButton('configure', ['label' => $this->__('Cron Configuration'), 'onclick' => "setLocation('{$this->getUrl('adminhtml/system_config/edit', ['section' => 'system'])}#system_cron')"]);
+        $this->_addButton('add_new', [
+            'label' => $this->__('Generate Schedule'),
+            'onclick' => "setLocation('{$this->getUrl('*/*/generateSchedule')}')",
+        ]);
+        $this->_addButton('configure', [
+            'label' => $this->__('Cron Configuration'),
+            'onclick' => "setLocation('{$this->getUrl('adminhtml/system_config/edit', [
+                'section' => 'system',
+            ])}#system_cron')",
+        ]);
         return parent::_prepareLayout();
     }
-
 
     /**
      * Return the last full houd
@@ -66,7 +65,6 @@ class Aoe_Scheduler_Block_Adminhtml_Timeline extends Mage_Adminhtml_Block_Widget
     {
         return mktime(date('H', $timestamp), 0, 0, date('n', $timestamp), date('j', $timestamp), date('Y', $timestamp));
     }
-
 
     /**
      * Returns the next full hour
@@ -89,32 +87,29 @@ class Aoe_Scheduler_Block_Adminhtml_Timeline extends Mage_Adminhtml_Block_Widget
 
     /**
      * Load schedules
-     *
-     * @return void
      */
     protected function loadSchedules()
     {
-        /* @var Mage_Cron_Model_Resource_Schedule_Collection $collection */
+        /** @var Mage_Cron_Model_Resource_Schedule_Collection $collection */
         $collection = $this->getSchedulesCollection();
 
         $minDate = null;
         $maxDate = null;
 
         foreach ($collection as $schedule) {
-            /* @var Aoe_Scheduler_Model_Schedule $schedule */
+            /** @var Aoe_Scheduler_Model_Schedule $schedule */
             $startTime = $schedule->getStarttime();
             if (empty($startTime)) {
                 continue;
             }
-            $minDate = is_null($minDate) ? $startTime : min($minDate, $startTime);
-            $maxDate = is_null($maxDate) ? $startTime : max($maxDate, $startTime);
+            $minDate = $minDate === null ? $startTime : min($minDate, $startTime);
+            $maxDate = $maxDate === null ? $startTime : max($maxDate, $startTime);
             $this->schedules[$schedule->getJobCode()][] = $schedule;
         }
 
         $this->starttime = $this->hourFloor(strtotime((string) $minDate));
         $this->endtime = $this->hourCeil(strtotime((string) $maxDate));
     }
-
 
     /**
      * Get timeline panel width
@@ -126,7 +121,6 @@ class Aoe_Scheduler_Block_Adminhtml_Timeline extends Mage_Adminhtml_Block_Widget
         return ($this->endtime - $this->starttime) / $this->zoom;
     }
 
-
     /**
      * Get "now" line
      *
@@ -137,7 +131,6 @@ class Aoe_Scheduler_Block_Adminhtml_Timeline extends Mage_Adminhtml_Block_Widget
         return (time() - $this->starttime) / $this->zoom;
     }
 
-
     /**
      * Get all available job codes
      *
@@ -147,7 +140,6 @@ class Aoe_Scheduler_Block_Adminhtml_Timeline extends Mage_Adminhtml_Block_Widget
     {
         return array_keys($this->schedules);
     }
-
 
     /**
      * Get schedules for given code
@@ -160,7 +152,6 @@ class Aoe_Scheduler_Block_Adminhtml_Timeline extends Mage_Adminhtml_Block_Widget
         return $this->schedules[$code];
     }
 
-
     /**
      * Get starttime
      *
@@ -170,7 +161,6 @@ class Aoe_Scheduler_Block_Adminhtml_Timeline extends Mage_Adminhtml_Block_Widget
     {
         return $this->starttime;
     }
-
 
     /**
      * Get endtime
@@ -182,11 +172,9 @@ class Aoe_Scheduler_Block_Adminhtml_Timeline extends Mage_Adminhtml_Block_Widget
         return $this->endtime;
     }
 
-
     /**
      * Get attributes for div representing a gantt element
      *
-     * @param Aoe_Scheduler_Model_Schedule $schedule
      * @return string
      */
     public function getGanttDivAttributes(Aoe_Scheduler_Model_Schedule $schedule)
@@ -240,8 +228,10 @@ class Aoe_Scheduler_Block_Adminhtml_Timeline extends Mage_Adminhtml_Block_Widget
     public function _toHtml()
     {
         $html = parent::_toHtml();
-        if (!$html && !Mage::getStoreConfigFlag('dev/template/allow_symlink')) {
-            $url = $this->getUrl('adminhtml/system_config/edit', ['section' => 'dev']) . '#dev_template';
+        if (! $html && ! Mage::getStoreConfigFlag('dev/template/allow_symlink')) {
+            $url = $this->getUrl('adminhtml/system_config/edit', [
+                'section' => 'dev',
+            ]) . '#dev_template';
             $html = $this->__('Warning: You installed Aoe_Scheduler using symlinks (e.g. via modman), but forgot to allow symlinks for template files! Please go to <a href="%s">System > Configuration > Advanced > Developer > Template Settings</a> and set "Allow Symlinks" to "yes"', $url);
         }
         return $html;

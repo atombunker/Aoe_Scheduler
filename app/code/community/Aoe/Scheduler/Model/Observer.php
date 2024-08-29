@@ -11,22 +11,20 @@ class Aoe_Scheduler_Model_Observer /* extends Mage_Cron_Model_Observer */
      * Process cron queue
      * Generate tasks schedule
      * Cleanup tasks schedule
-     *
-     * @param Varien_Event_Observer $observer
      */
     public function dispatch(Varien_Event_Observer $observer)
     {
-        if (!Mage::getStoreConfigFlag('system/cron/enable')) {
+        if (! Mage::getStoreConfigFlag('system/cron/enable')) {
             return;
         }
 
-        $processManager = Mage::getModel('aoe_scheduler/processManager'); /* @var $processManager Aoe_Scheduler_Model_ProcessManager */
+        $processManager = Mage::getModel('aoe_scheduler/processManager'); /** @var Aoe_Scheduler_Model_ProcessManager $processManager */
         $processManager->watchdog();
 
-        $scheduleManager = Mage::getModel('aoe_scheduler/scheduleManager'); /* @var $scheduleManager Aoe_Scheduler_Model_ScheduleManager */
+        $scheduleManager = Mage::getModel('aoe_scheduler/scheduleManager'); /** @var Aoe_Scheduler_Model_ScheduleManager $scheduleManager */
         $scheduleManager->logRun();
 
-        $helper = Mage::helper('aoe_scheduler'); /* @var Aoe_Scheduler_Helper_Data $helper */
+        $helper = Mage::helper('aoe_scheduler'); /** @var Aoe_Scheduler_Helper_Data $helper */
         $includeJobs = $helper->addGroupJobs((array) $observer->getIncludeJobs(), (array) $observer->getIncludeGroups());
         $excludeJobs = $helper->addGroupJobs((array) $observer->getExcludeJobs(), (array) $observer->getExcludeGroups());
 
@@ -35,7 +33,7 @@ class Aoe_Scheduler_Model_Observer /* extends Mage_Cron_Model_Observer */
 
         // Iterate over all pending jobs
         foreach ($scheduleManager->getPendingSchedules($includeJobs, $excludeJobs) as $schedule) {
-            /* @var Aoe_Scheduler_Model_Schedule $schedule */
+            /** @var Aoe_Scheduler_Model_Schedule $schedule */
             $schedule->process();
         }
 
@@ -48,31 +46,29 @@ class Aoe_Scheduler_Model_Observer /* extends Mage_Cron_Model_Observer */
 
     /**
      * Process cron queue for tasks marked as 'always'
-     *
-     * @param Varien_Event_Observer $observer
      */
     public function dispatchAlways(Varien_Event_Observer $observer)
     {
-        if (!Mage::getStoreConfigFlag('system/cron/enable')) {
+        if (! Mage::getStoreConfigFlag('system/cron/enable')) {
             return;
         }
 
-        $processManager = Mage::getModel('aoe_scheduler/processManager'); /* @var $processManager Aoe_Scheduler_Model_ProcessManager */
+        $processManager = Mage::getModel('aoe_scheduler/processManager'); /** @var Aoe_Scheduler_Model_ProcessManager $processManager */
         $processManager->watchdog();
 
-        $scheduleManager = Mage::getModel('aoe_scheduler/scheduleManager'); /* @var $scheduleManager Aoe_Scheduler_Model_ScheduleManager */
+        $scheduleManager = Mage::getModel('aoe_scheduler/scheduleManager'); /** @var Aoe_Scheduler_Model_ScheduleManager $scheduleManager */
 
-        $helper = Mage::helper('aoe_scheduler'); /* @var Aoe_Scheduler_Helper_Data $helper */
+        $helper = Mage::helper('aoe_scheduler'); /** @var Aoe_Scheduler_Helper_Data $helper */
         $includeJobs = $helper->addGroupJobs((array) $observer->getIncludeJobs(), (array) $observer->getIncludeGroups());
         $excludeJobs = $helper->addGroupJobs((array) $observer->getExcludeJobs(), (array) $observer->getExcludeGroups());
 
-        /* @var $jobs Aoe_Scheduler_Model_Resource_Job_Collection */
+        /** @var Aoe_Scheduler_Model_Resource_Job_Collection $jobs */
         $jobs = Mage::getSingleton('aoe_scheduler/job')->getCollection();
         $jobs->setWhiteList($includeJobs);
         $jobs->setBlackList($excludeJobs);
         $jobs->setActiveOnly(true);
         foreach ($jobs as $job) {
-            /* @var Aoe_Scheduler_Model_Job $job */
+            /** @var Aoe_Scheduler_Model_Job $job */
             if ($job->isAlwaysTask() && $job->getRunModel()) {
                 $repetition = 0;
                 do {
@@ -87,5 +83,4 @@ class Aoe_Scheduler_Model_Observer /* extends Mage_Cron_Model_Observer */
             }
         }
     }
-
 }

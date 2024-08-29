@@ -2,7 +2,6 @@
 
 class CronGroupsWhiteListAlwaysTest extends AbstractTest
 {
-
     protected $groups = [];
 
     protected function setUp()
@@ -12,7 +11,7 @@ class CronGroupsWhiteListAlwaysTest extends AbstractTest
         $this->groups['groupA'] = uniqid('groupA_');
         $this->groups['groupB'] = uniqid('groupB_');
 
-        $jobWithGroupA = Mage::getModel('aoe_scheduler/job'); /* @var $jobWithGroupA Aoe_Scheduler_Model_Job */
+        $jobWithGroupA = Mage::getModel('aoe_scheduler/job'); /** @var Aoe_Scheduler_Model_Job $jobWithGroupA */
         $jobWithGroupA->setScheduleCronExpr('always');
         $jobWithGroupA->setJobCode(uniqid('t_job_'));
         $jobWithGroupA->setRunModel('aoe_scheduler/task_test::run');
@@ -21,7 +20,7 @@ class CronGroupsWhiteListAlwaysTest extends AbstractTest
         $jobWithGroupA->save();
         $this->jobs['jobWithGroupA'] = $jobWithGroupA;
 
-        $jobWithGroupB = Mage::getModel('aoe_scheduler/job'); /* @var $jobWithGroupB Aoe_Scheduler_Model_Job */
+        $jobWithGroupB = Mage::getModel('aoe_scheduler/job'); /** @var Aoe_Scheduler_Model_Job $jobWithGroupB */
         $jobWithGroupB->setScheduleCronExpr('always');
         $jobWithGroupB->setJobCode(uniqid('t_job_'));
         $jobWithGroupB->setRunModel('aoe_scheduler/task_test::run');
@@ -30,7 +29,7 @@ class CronGroupsWhiteListAlwaysTest extends AbstractTest
         $jobWithGroupB->save();
         $this->jobs['jobWithGroupB'] = $jobWithGroupB;
 
-        $jobWithGroupAandB = Mage::getModel('aoe_scheduler/job'); /* @var $jobWithGroupAandB Aoe_Scheduler_Model_Job */
+        $jobWithGroupAandB = Mage::getModel('aoe_scheduler/job'); /** @var Aoe_Scheduler_Model_Job $jobWithGroupAandB */
         $jobWithGroupAandB->setScheduleCronExpr('always');
         $jobWithGroupAandB->setJobCode(uniqid('t_job_'));
         $jobWithGroupAandB->setRunModel('aoe_scheduler/task_test::run');
@@ -43,16 +42,15 @@ class CronGroupsWhiteListAlwaysTest extends AbstractTest
         Mage::app()->saveCache(time(), Mage_Cron_Model_Observer::CACHE_KEY_LAST_SCHEDULE_GENERATE_AT, ['crontab'], null);
     }
 
-    /**
-     * @test
-     */
-    public function scheduleJobAndRunCron()
+    public function testScheduleJobAndRunCron()
     {
         $sameRequest = false;
 
         if ($sameRequest) {
             // dispatch event
-            $event = new Varien_Event_Observer(['include_groups' => [$this->groups['groupA']]]);
+            $event = new Varien_Event_Observer([
+                'include_groups' => [$this->groups['groupA']],
+            ]);
             $observer = new Aoe_Scheduler_Model_Observer();
             $observer->dispatch($event);
         } else {
@@ -61,7 +59,7 @@ class CronGroupsWhiteListAlwaysTest extends AbstractTest
 
         $schedulesJobWithGroupA = Mage::getModel('cron/schedule')->getCollection()->addFieldToFilter('job_code', $this->jobs['jobWithGroupA']->getJobCode());
         $this->assertCount(1, $schedulesJobWithGroupA);
-        foreach ($schedulesJobWithGroupA as $schedule) { /* @var $schedule Aoe_Scheduler_Model_Schedule */
+        foreach ($schedulesJobWithGroupA as $schedule) { /** @var Aoe_Scheduler_Model_Schedule $schedule */
             $this->assertEquals(Aoe_Scheduler_Model_Schedule::STATUS_SUCCESS, $schedule->getStatus());
         }
 
@@ -70,9 +68,8 @@ class CronGroupsWhiteListAlwaysTest extends AbstractTest
 
         $schedulesJobWithGroupAandB = Mage::getModel('cron/schedule')->getCollection()->addFieldToFilter('job_code', $this->jobs['jobWithGroupAandB']->getJobCode());
         $this->assertCount(1, $schedulesJobWithGroupAandB);
-        foreach ($schedulesJobWithGroupAandB as $schedule) { /* @var $schedule Aoe_Scheduler_Model_Schedule */
+        foreach ($schedulesJobWithGroupAandB as $schedule) { /** @var Aoe_Scheduler_Model_Schedule $schedule */
             $this->assertEquals(Aoe_Scheduler_Model_Schedule::STATUS_SUCCESS, $schedule->getStatus());
         }
     }
-
 }

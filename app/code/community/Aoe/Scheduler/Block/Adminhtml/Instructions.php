@@ -7,7 +7,6 @@
  */
 class Aoe_Scheduler_Block_Adminhtml_Instructions extends Mage_Adminhtml_Block_Template
 {
-
     public function getCurrentUser()
     {
         return Mage::helper('aoe_scheduler')->getRunningUser();

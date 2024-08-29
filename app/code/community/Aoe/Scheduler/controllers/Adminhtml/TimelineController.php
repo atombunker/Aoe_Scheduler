@@ -8,8 +8,6 @@ class Aoe_Scheduler_Adminhtml_TimelineController extends Aoe_Scheduler_Controlle
 {
     /**
      * Index action
-     *
-     * @return void
      */
     public function indexAction()
     {

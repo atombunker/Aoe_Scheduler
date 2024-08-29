@@ -2,8 +2,8 @@
 
 abstract class AbstractTest extends PHPUnit_Framework_TestCase
 {
-
     protected $jobs = [];
+
     protected $schedules = [];
 
     protected function setUp()
@@ -13,16 +13,16 @@ abstract class AbstractTest extends PHPUnit_Framework_TestCase
         Mage::app();
 
         // delete all schedules
-        $scheduleManager = Mage::getModel('aoe_scheduler/scheduleManager'); /* @var Aoe_Scheduler_Model_ScheduleManager $scheduleManager */
+        $scheduleManager = Mage::getModel('aoe_scheduler/scheduleManager'); /** @var Aoe_Scheduler_Model_ScheduleManager $scheduleManager */
         $scheduleManager->deleteAll();
     }
 
-    public function tearDown()
+    protected function tearDown()
     {
-        foreach ($this->jobs as $job) { /* @var $job Aoe_Scheduler_Model_Job */
+        foreach ($this->jobs as $job) { /** @var Aoe_Scheduler_Model_Job $job */
             $job->delete();
         }
-        foreach ($this->schedules as $schedule) { /* @var $schedule Aoe_Scheduler_Model_Job */
+        foreach ($this->schedules as $schedule) { /** @var Aoe_Scheduler_Model_Job $schedule */
             $schedule->delete();
         }
         parent::tearDown();
@@ -47,7 +47,7 @@ abstract class AbstractTest extends PHPUnit_Framework_TestCase
     {
         return [[function () {
             // trigger dispatch
-            $observer = Mage::getModel('aoe_scheduler/observer'); /* @var $observer Aoe_Scheduler_Model_Observer */
+            $observer = Mage::getModel('aoe_scheduler/observer'); /** @var Aoe_Scheduler_Model_Observer $observer */
             $observer->dispatchAlways(new Varien_Event_Observer());
         }], [function () {
             shell_exec('php ' . Mage::getBaseDir() . '/cron.php');
@@ -79,7 +79,7 @@ abstract class AbstractTest extends PHPUnit_Framework_TestCase
     {
         return [[function () {
             // trigger dispatch
-            $observer = Mage::getModel('aoe_scheduler/observer'); /* @var $observer Aoe_Scheduler_Model_Observer */
+            $observer = Mage::getModel('aoe_scheduler/observer'); /** @var Aoe_Scheduler_Model_Observer $observer */
             $observer->dispatch(new Varien_Event_Observer());
         }], [function () {
             shell_exec('php ' . Mage::getBaseDir() . '/cron.php');

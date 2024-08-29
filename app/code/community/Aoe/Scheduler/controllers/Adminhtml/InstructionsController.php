@@ -8,8 +8,6 @@ class Aoe_Scheduler_Adminhtml_InstructionsController extends Aoe_Scheduler_Contr
 {
     /**
      * Index action
-     *
-     * @return void
      */
     public function indexAction()
     {

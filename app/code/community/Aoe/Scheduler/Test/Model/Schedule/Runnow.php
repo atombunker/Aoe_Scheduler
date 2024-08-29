@@ -2,11 +2,10 @@
 
 class Aoe_Scheduler_Test_Model_Schedule_Runnow extends EcomDev_PHPUnit_Test_Case
 {
-
     public function setup()
     {
         // delete all schedules
-        $scheduleManager = Mage::getModel('aoe_scheduler/scheduleManager'); /* @var Aoe_Scheduler_Model_ScheduleManager $scheduleManager */
+        $scheduleManager = Mage::getModel('aoe_scheduler/scheduleManager'); /** @var Aoe_Scheduler_Model_ScheduleManager $scheduleManager */
         $scheduleManager->deleteAll();
     }
 
@@ -25,7 +24,7 @@ class Aoe_Scheduler_Test_Model_Schedule_Runnow extends EcomDev_PHPUnit_Test_Case
         $scheduleId = $schedule->getId();
         $this->assertGreaterThan(0, intval($schedule->getId()));
 
-        /* @var Aoe_Scheduler_Model_Schedule $loadedSchedule */
+        /** @var Aoe_Scheduler_Model_Schedule $loadedSchedule */
         $loadedSchedule = Mage::getModel('cron/schedule')->load($scheduleId);
         $this->assertEquals($scheduleId, $loadedSchedule->getId());
 
@@ -48,7 +47,9 @@ class Aoe_Scheduler_Test_Model_Schedule_Runnow extends EcomDev_PHPUnit_Test_Case
 
         $jobCode = 'aoescheduler_testtask';
 
-        $parameter = ['outcome' => 'error'];
+        $parameter = [
+            'outcome' => 'error',
+        ];
 
         $schedule->setJobCode($jobCode);
         $schedule->setParameters(json_encode($parameter));
@@ -57,7 +58,7 @@ class Aoe_Scheduler_Test_Model_Schedule_Runnow extends EcomDev_PHPUnit_Test_Case
         $scheduleId = $schedule->getId();
         $this->assertGreaterThan(0, intval($schedule->getId()));
 
-        /* @var Aoe_Scheduler_Model_Schedule $loadedSchedule */
+        /** @var Aoe_Scheduler_Model_Schedule $loadedSchedule */
         $loadedSchedule = Mage::getModel('cron/schedule')->load($scheduleId);
         $this->assertEquals($scheduleId, $loadedSchedule->getId());
 
@@ -80,7 +81,9 @@ class Aoe_Scheduler_Test_Model_Schedule_Runnow extends EcomDev_PHPUnit_Test_Case
 
         $jobCode = 'aoescheduler_testtask';
 
-        $parameter = ['outcome' => 'nothing'];
+        $parameter = [
+            'outcome' => 'nothing',
+        ];
 
         $schedule->setJobCode($jobCode);
         $schedule->setParameters(json_encode($parameter));
@@ -89,7 +92,7 @@ class Aoe_Scheduler_Test_Model_Schedule_Runnow extends EcomDev_PHPUnit_Test_Case
         $scheduleId = $schedule->getId();
         $this->assertGreaterThan(0, intval($schedule->getId()));
 
-        /* @var Aoe_Scheduler_Model_Schedule $loadedSchedule */
+        /** @var Aoe_Scheduler_Model_Schedule $loadedSchedule */
         $loadedSchedule = Mage::getModel('cron/schedule')->load($scheduleId);
         $this->assertEquals($scheduleId, $loadedSchedule->getId());
 
@@ -112,7 +115,9 @@ class Aoe_Scheduler_Test_Model_Schedule_Runnow extends EcomDev_PHPUnit_Test_Case
 
         $jobCode = 'aoescheduler_testtask';
 
-        $parameter = ['outcome' => 'exception'];
+        $parameter = [
+            'outcome' => 'exception',
+        ];
 
         $schedule->setJobCode($jobCode);
         $schedule->setParameters(json_encode($parameter));
@@ -121,7 +126,7 @@ class Aoe_Scheduler_Test_Model_Schedule_Runnow extends EcomDev_PHPUnit_Test_Case
         $scheduleId = $schedule->getId();
         $this->assertGreaterThan(0, intval($schedule->getId()));
 
-        /* @var Aoe_Scheduler_Model_Schedule $loadedSchedule */
+        /** @var Aoe_Scheduler_Model_Schedule $loadedSchedule */
         $loadedSchedule = Mage::getModel('cron/schedule')->load($scheduleId);
         $this->assertEquals($scheduleId, $loadedSchedule->getId());
 
