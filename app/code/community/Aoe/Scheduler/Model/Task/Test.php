@@ -21,7 +21,7 @@ class Aoe_Scheduler_Model_Task_Test
     {
         $parameters = $schedule->getParameters();
         if ($parameters) {
-            $parameters = json_decode($parameters, true);
+            $parameters = json_decode((string) $parameters, true);
         }
 
         // fake duration

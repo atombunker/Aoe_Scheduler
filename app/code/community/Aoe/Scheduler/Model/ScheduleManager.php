@@ -21,13 +21,13 @@ class Aoe_Scheduler_Model_ScheduleManager
     {
         $schedules = Mage::getModel('cron/schedule')->getCollection()
             ->addFieldToFilter('status', Aoe_Scheduler_Model_Schedule::STATUS_PENDING)
-            ->addFieldToFilter('scheduled_at', array('lt' => strftime('%Y-%m-%d %H:%M:%S', time())))
+            ->addFieldToFilter('scheduled_at', ['lt' => strftime('%Y-%m-%d %H:%M:%S', time())])
             ->addOrder('scheduled_at', 'DESC')
             ->load();
 
         Mage::getSingleton('cron/schedule')->getResource()->beginTransaction(TRUE);
         try {
-            $seenJobs = array();
+            $seenJobs = [];
             foreach ($schedules as $key => $schedule) {
                 /* @var Aoe_Scheduler_Model_Schedule $schedule */
                 if (isset($seenJobs[$schedule->getJobCode()])) {
@@ -63,21 +63,21 @@ class Aoe_Scheduler_Model_ScheduleManager
      *
      * @return Mage_Cron_Model_Resource_Schedule_Collection
      */
-    public function getPendingSchedules(array $whitelist = array(), array $blacklist = array())
+    public function getPendingSchedules(array $whitelist = [], array $blacklist = [])
     {
         $pendingSchedules = Mage::getModel('cron/schedule')->getCollection()
             ->addFieldToFilter('status', Aoe_Scheduler_Model_Schedule::STATUS_PENDING)
-            ->addFieldToFilter('scheduled_at', array('lt' => strftime('%Y-%m-%d %H:%M:%S', time())))
+            ->addFieldToFilter('scheduled_at', ['lt' => strftime('%Y-%m-%d %H:%M:%S', time())])
             ->addOrder('scheduled_at', 'ASC');
 
         $whitelist = array_filter(array_map('trim', $whitelist));
         if (!empty($whitelist)) {
-            $pendingSchedules->addFieldToFilter('job_code', array('in' => $whitelist));
+            $pendingSchedules->addFieldToFilter('job_code', ['in' => $whitelist]);
         }
 
         $blacklist = array_filter(array_map('trim', $blacklist));
         if (!empty($blacklist)) {
-            $pendingSchedules->addFieldToFilter('job_code', array('nin' => $blacklist));
+            $pendingSchedules->addFieldToFilter('job_code', ['nin' => $blacklist]);
         }
 
         return $pendingSchedules;
@@ -98,7 +98,7 @@ class Aoe_Scheduler_Model_ScheduleManager
             $ts = strftime('%Y-%m-%d %H:%M:00', time());
             $schedule = Mage::getModel('cron/schedule'); /* @var $schedule Aoe_Scheduler_Model_Schedule */
             $schedule
-                ->setScheduledReason($reason ? $reason : Aoe_Scheduler_Model_Schedule::REASON_ALWAYS)
+                ->setScheduledReason($reason ?: Aoe_Scheduler_Model_Schedule::REASON_ALWAYS)
                 ->setJobCode($jobCode)
                 ->setStatus(Aoe_Scheduler_Model_Schedule::STATUS_RUNNING)
                 ->setCreatedAt($ts)
@@ -131,7 +131,7 @@ class Aoe_Scheduler_Model_ScheduleManager
 			HAVING qty > 1;
 		");
         foreach ($results as $row) {
-            $ids = explode(',', $row['ids']);
+            $ids = explode(',', (string) $row['ids']);
             $removeIds = array_slice($ids, 1);
             foreach ($removeIds as $id) {
                 Mage::getModel('cron/schedule')->load($id)->delete();
@@ -168,7 +168,7 @@ class Aoe_Scheduler_Model_ScheduleManager
         /**
          * save time schedules generation was ran with no expiration
          */
-        Mage::app()->saveCache(time(), Mage_Cron_Model_Observer::CACHE_KEY_LAST_SCHEDULE_GENERATE_AT, array('crontab'), null);
+        Mage::app()->saveCache(time(), Mage_Cron_Model_Observer::CACHE_KEY_LAST_SCHEDULE_GENERATE_AT, ['crontab'], null);
 
         $this->deleteDuplicates();
 
@@ -198,7 +198,7 @@ class Aoe_Scheduler_Model_ScheduleManager
         /* @var $pendingSchedules Mage_Cron_Model_Resource_Schedule_Collection */
         $pendingSchedules = Mage::getModel('cron/schedule')->getCollection()
             ->addFieldToFilter('status', Aoe_Scheduler_Model_Schedule::STATUS_PENDING)
-            ->addFieldToFilter('scheduled_at', array('gt' => strftime('%Y-%m-%d %H:%M:%S', time())))
+            ->addFieldToFilter('scheduled_at', ['gt' => strftime('%Y-%m-%d %H:%M:%S', time())])
             ->addOrder('scheduled_at', 'ASC');
         if (!empty($jobCode)) {
             $pendingSchedules->addFieldToFilter('job_code', $jobCode);
@@ -207,7 +207,7 @@ class Aoe_Scheduler_Model_ScheduleManager
             /* @var Aoe_Scheduler_Model_Schedule $schedule */
             $schedule->delete();
         }
-        Mage::app()->saveCache(0, Mage_Cron_Model_Observer::CACHE_KEY_LAST_SCHEDULE_GENERATE_AT, array('crontab'), null);
+        Mage::app()->saveCache(0, Mage_Cron_Model_Observer::CACHE_KEY_LAST_SCHEDULE_GENERATE_AT, ['crontab'], null);
         return $this;
     }
 
@@ -223,7 +223,7 @@ class Aoe_Scheduler_Model_ScheduleManager
         foreach ($schedules as $key => $schedule) { /* @var Aoe_Scheduler_Model_Schedule $schedule */
             $schedule->delete();
         }
-        Mage::app()->saveCache(0, Mage_Cron_Model_Observer::CACHE_KEY_LAST_SCHEDULE_GENERATE_AT, array('crontab'), null);
+        Mage::app()->saveCache(0, Mage_Cron_Model_Observer::CACHE_KEY_LAST_SCHEDULE_GENERATE_AT, ['crontab'], null);
         return $this;
     }
 
@@ -240,8 +240,8 @@ class Aoe_Scheduler_Model_ScheduleManager
             return $this;
         }
 
-        $exists = array();
-        foreach ($this->getPendingSchedules(array($job->getJobCode()), array()) as $schedule) {
+        $exists = [];
+        foreach ($this->getPendingSchedules([$job->getJobCode()], []) as $schedule) {
             /* @var Aoe_Scheduler_Model_Schedule $schedule */
             $exists[$schedule->getJobCode() . '/' . $schedule->getScheduledAt()] = 1;
         }
@@ -287,36 +287,22 @@ class Aoe_Scheduler_Model_ScheduleManager
         $startTime = microtime(true);
 
         $history = Mage::getModel('cron/schedule')->getCollection()
-            ->addFieldToFilter('status', array('nin' => array(
-                Aoe_Scheduler_Model_Schedule::STATUS_PENDING,
-                Aoe_Scheduler_Model_Schedule::STATUS_RUNNING
-            )))
+            ->addFieldToFilter('status', ['nin' => [Aoe_Scheduler_Model_Schedule::STATUS_PENDING, Aoe_Scheduler_Model_Schedule::STATUS_RUNNING]])
             ->load();
 
-        $historyLifetimes = array(
-            Aoe_Scheduler_Model_Schedule::STATUS_KILLED =>          Mage::getStoreConfig(Mage_Cron_Model_Observer::XML_PATH_HISTORY_SUCCESS)*60,
-            Aoe_Scheduler_Model_Schedule::STATUS_DISAPPEARED =>     Mage::getStoreConfig(Mage_Cron_Model_Observer::XML_PATH_HISTORY_FAILURE)*60,
-            Aoe_Scheduler_Model_Schedule::STATUS_DIDNTDOANYTHING => Mage::getStoreConfig(Mage_Cron_Model_Observer::XML_PATH_HISTORY_SUCCESS)*60,
-            Aoe_Scheduler_Model_Schedule::STATUS_SUCCESS =>         Mage::getStoreConfig(Mage_Cron_Model_Observer::XML_PATH_HISTORY_SUCCESS)*60,
-            Aoe_Scheduler_Model_Schedule::STATUS_REPEAT =>          Mage::getStoreConfig(Mage_Cron_Model_Observer::XML_PATH_HISTORY_SUCCESS)*60,
-            Aoe_Scheduler_Model_Schedule::STATUS_MISSED =>          Mage::getStoreConfig(Mage_Cron_Model_Observer::XML_PATH_HISTORY_FAILURE)*60,
-            Aoe_Scheduler_Model_Schedule::STATUS_SKIP_PILINGUP =>   Mage::getStoreConfig(Mage_Cron_Model_Observer::XML_PATH_HISTORY_FAILURE)*60,
-            Aoe_Scheduler_Model_Schedule::STATUS_ERROR =>           Mage::getStoreConfig(Mage_Cron_Model_Observer::XML_PATH_HISTORY_FAILURE)*60,
-            Aoe_Scheduler_Model_Schedule::STATUS_DIED =>            Mage::getStoreConfig(Mage_Cron_Model_Observer::XML_PATH_HISTORY_FAILURE)*60,
-            Aoe_Scheduler_Model_Schedule::STATUS_SKIP_OTHERJOBRUNNING => Mage::getStoreConfig(Mage_Cron_Model_Observer::XML_PATH_HISTORY_FAILURE)*60,
-        );
+        $historyLifetimes = [Aoe_Scheduler_Model_Schedule::STATUS_KILLED =>          Mage::getStoreConfig(Mage_Cron_Model_Observer::XML_PATH_HISTORY_SUCCESS)*60, Aoe_Scheduler_Model_Schedule::STATUS_DISAPPEARED =>     Mage::getStoreConfig(Mage_Cron_Model_Observer::XML_PATH_HISTORY_FAILURE)*60, Aoe_Scheduler_Model_Schedule::STATUS_DIDNTDOANYTHING => Mage::getStoreConfig(Mage_Cron_Model_Observer::XML_PATH_HISTORY_SUCCESS)*60, Aoe_Scheduler_Model_Schedule::STATUS_SUCCESS =>         Mage::getStoreConfig(Mage_Cron_Model_Observer::XML_PATH_HISTORY_SUCCESS)*60, Aoe_Scheduler_Model_Schedule::STATUS_REPEAT =>          Mage::getStoreConfig(Mage_Cron_Model_Observer::XML_PATH_HISTORY_SUCCESS)*60, Aoe_Scheduler_Model_Schedule::STATUS_MISSED =>          Mage::getStoreConfig(Mage_Cron_Model_Observer::XML_PATH_HISTORY_FAILURE)*60, Aoe_Scheduler_Model_Schedule::STATUS_SKIP_PILINGUP =>   Mage::getStoreConfig(Mage_Cron_Model_Observer::XML_PATH_HISTORY_FAILURE)*60, Aoe_Scheduler_Model_Schedule::STATUS_ERROR =>           Mage::getStoreConfig(Mage_Cron_Model_Observer::XML_PATH_HISTORY_FAILURE)*60, Aoe_Scheduler_Model_Schedule::STATUS_DIED =>            Mage::getStoreConfig(Mage_Cron_Model_Observer::XML_PATH_HISTORY_FAILURE)*60, Aoe_Scheduler_Model_Schedule::STATUS_SKIP_OTHERJOBRUNNING => Mage::getStoreConfig(Mage_Cron_Model_Observer::XML_PATH_HISTORY_FAILURE)*60];
 
         $now = time();
         foreach ($history->getIterator() as $record) { /* @var $record Aoe_Scheduler_Model_Schedule */
             if (isset($historyLifetimes[$record->getStatus()])) {
-                if (strtotime($record->getExecutedAt()) < $now - $historyLifetimes[$record->getStatus()]) {
+                if (strtotime((string) $record->getExecutedAt()) < $now - $historyLifetimes[$record->getStatus()]) {
                     $record->delete();
                 }
             }
         }
 
         // save time history cleanup was ran with no expiration
-        Mage::app()->saveCache(time(), Mage_Cron_Model_Observer::CACHE_KEY_LAST_HISTORY_CLEANUP_AT, array('crontab'), null);
+        Mage::app()->saveCache(time(), Mage_Cron_Model_Observer::CACHE_KEY_LAST_HISTORY_CLEANUP_AT, ['crontab'], null);
 
 
         // delete successful tasks (beyond the configured max number of tasks to keep)
@@ -324,15 +310,12 @@ class Aoe_Scheduler_Model_ScheduleManager
         if ($maxNo) {
             $history = Mage::getModel('cron/schedule')->getCollection()
                 ->addFieldToFilter(
-                    array('status'),
-                    array(
-                        array('eq' => Aoe_Scheduler_Model_Schedule::STATUS_SUCCESS),
-                        array('eq' => Aoe_Scheduler_Model_Schedule::STATUS_REPEAT)
-                    )
+                    ['status'],
+                    [['eq' => Aoe_Scheduler_Model_Schedule::STATUS_SUCCESS], ['eq' => Aoe_Scheduler_Model_Schedule::STATUS_REPEAT]]
                 )
                 ->setOrder('finished_at', 'desc')
                 ->load();
-            $counter = array();
+            $counter = [];
             foreach ($history->getIterator() as $record) { /* @var $record Aoe_Scheduler_Model_Schedule */
                 $jobCode = $record->getJobCode();
                 if (!isset($counter[$jobCode])) {
@@ -359,10 +342,10 @@ class Aoe_Scheduler_Model_ScheduleManager
     public function logRun()
     {
         $lastRuns = Mage::app()->loadCache(self::CACHE_KEY_SCHEDULER_LASTRUNS);
-        $lastRuns = explode(',', $lastRuns);
+        $lastRuns = explode(',', (string) $lastRuns);
         $lastRuns[] = time();
         $lastRuns = array_slice($lastRuns, -100);
-        Mage::app()->saveCache(implode(',', $lastRuns), self::CACHE_KEY_SCHEDULER_LASTRUNS, array('crontab'), null);
+        Mage::app()->saveCache(implode(',', $lastRuns), self::CACHE_KEY_SCHEDULER_LASTRUNS, ['crontab'], null);
     }
 
     /**
@@ -373,23 +356,17 @@ class Aoe_Scheduler_Model_ScheduleManager
     public function getMeasuredCronInterval()
     {
         $lastRuns = Mage::app()->loadCache(self::CACHE_KEY_SCHEDULER_LASTRUNS);
-        $lastRuns = array_values(array_filter(explode(',', $lastRuns)));
+        $lastRuns = array_values(array_filter(explode(',', (string) $lastRuns)));
         if (count($lastRuns) < 3) {
             // not enough data points
             return false;
         }
-        $gaps = array();
+        $gaps = [];
         foreach ($lastRuns as $index => $run) {
             if ($index > 0) {
                 $gaps[$index] = intval($lastRuns[$index]) - intval($lastRuns[$index-1]);
             }
         }
-        return array(
-            'average' => round((array_sum($gaps) / count($gaps)) / 60, 2),
-            'max' => round(max($gaps) / 60, 2),
-            'min' => round(min($gaps) / 60, 2),
-            'count' => count($gaps),
-            'last' => end($lastRuns)
-        );
+        return ['average' => round((array_sum($gaps) / count($gaps)) / 60, 2), 'max' => round(max($gaps) / 60, 2), 'min' => round(min($gaps) / 60, 2), 'count' => count($gaps), 'last' => end($lastRuns)];
     }
 }

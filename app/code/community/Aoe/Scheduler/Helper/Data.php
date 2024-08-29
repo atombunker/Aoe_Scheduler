@@ -38,7 +38,7 @@ class Aoe_Scheduler_Helper_Data extends Mage_Core_Helper_Abstract
         $result = array_map('trim', $explodedValues);
 
         if ($removeEmptyValues) {
-            $temp = array();
+            $temp = [];
             foreach ($result as $value) {
                 if ($value !== '') {
                     $temp[] = $value;
@@ -114,11 +114,12 @@ class Aoe_Scheduler_Helper_Data extends Mage_Core_Helper_Abstract
         } else {
             $dateConverter = Mage::getModel('core/date');
             $value = $dateConverter->date($dateFormat, $value);
-            $replace = array(
-                $dateConverter->date('Y-m-d ', time()) => $echoToday ? Mage::helper('aoe_scheduler')->__('Today') . ', ' : '', // today
+            $replace = [
+                $dateConverter->date('Y-m-d ', time()) => $echoToday ? Mage::helper('aoe_scheduler')->__('Today') . ', ' : '',
+                // today
                 $dateConverter->date('Y-m-d ', strtotime('+1 day')) => Mage::helper('aoe_scheduler')->__('Tomorrow') . ', ',
                 $dateConverter->date('Y-m-d ', strtotime('-1 day')) => Mage::helper('aoe_scheduler')->__('Yesterday') . ', ',
-            );
+            ];
             $value = str_replace(array_keys($replace), array_values($replace), $value);
         }
         return $value;
@@ -146,11 +147,8 @@ class Aoe_Scheduler_Helper_Data extends Mage_Core_Helper_Abstract
         $schedules = Mage::getModel('cron/schedule')->getCollection(); /* @var $schedules Mage_Cron_Model_Mysql4_Schedule_Collection */
         $schedules->getSelect()->limit(1)->order('executed_at DESC');
         $schedules->addFieldToFilter(
-            array('status'),
-            array(
-                array('eq' => Aoe_Scheduler_Model_Schedule::STATUS_SUCCESS),
-                array('eq' => Aoe_Scheduler_Model_Schedule::STATUS_REPEAT)
-            )
+            ['status'],
+            [['eq' => Aoe_Scheduler_Model_Schedule::STATUS_SUCCESS], ['eq' => Aoe_Scheduler_Model_Schedule::STATUS_REPEAT]]
         );
 
         $schedules->addFieldToFilter('job_code', $jobCode);
@@ -175,8 +173,8 @@ class Aoe_Scheduler_Helper_Data extends Mage_Core_Helper_Abstract
         if (is_null($time2)) {
             $time2 = Mage::getModel('core/date')->date();
         }
-        $time1 = strtotime($time1);
-        $time2 = strtotime($time2);
+        $time1 = strtotime((string) $time1);
+        $time2 = strtotime((string) $time2);
         return $time2 - $time1;
     }
 
@@ -210,7 +208,7 @@ class Aoe_Scheduler_Helper_Data extends Mage_Core_Helper_Abstract
         sort($exclude);
 
         $key = $jobCode . '|' . implode(',', $include) . '|' . implode(',', $exclude);
-        static $cache = array();
+        static $cache = [];
         if (!isset($cache[$key])) {
             if (count($include) == 0 && count($exclude) == 0) {
                 $cache[$key] = true;
@@ -236,7 +234,7 @@ class Aoe_Scheduler_Helper_Data extends Mage_Core_Helper_Abstract
     public function getGroupsToJobsMap($forceRebuild = false)
     {
         if ($this->groupsToJobsMap === null || $forceRebuild) {
-            $map = array();
+            $map = [];
 
             /* @var $jobs Aoe_Scheduler_Model_Resource_Job_Collection */
             $jobs = Mage::getSingleton('aoe_scheduler/job')->getCollection();
@@ -289,13 +287,13 @@ class Aoe_Scheduler_Helper_Data extends Mage_Core_Helper_Abstract
 
         foreach ($recipients as $recipient) {
             $emailTemplate = Mage::getModel('core/email_template'); /* @var $emailTemplate Mage_Core_Model_Email_Template */
-            $emailTemplate->setDesignConfig(array('area' => 'backend'));
+            $emailTemplate->setDesignConfig(['area' => 'backend']);
             $emailTemplate->sendTransactional(
                 Mage::getStoreConfig(self::XML_PATH_EMAIL_TEMPLATE),
                 Mage::getStoreConfig(self::XML_PATH_EMAIL_IDENTITY),
                 $recipient,
                 null,
-                array('error' => $error, 'schedule' => $schedule)
+                ['error' => $error, 'schedule' => $schedule]
             );
         }
 
@@ -319,7 +317,7 @@ class Aoe_Scheduler_Helper_Data extends Mage_Core_Helper_Abstract
         if (!method_exists($model, $run[2])) {
             Mage::throwException(Mage::helper('cron')->__('Invalid callback: Method for %s::%s does not exist', $run[1], $run[2]));
         }
-        $callback = array($model, $run[2]);
+        $callback = [$model, $run[2]];
         return $callback;
     }
 
@@ -335,7 +333,7 @@ class Aoe_Scheduler_Helper_Data extends Mage_Core_Helper_Abstract
             $schedule = Mage::getModel('cron/schedule');
             /* @var $schedule Mage_Cron_Model_Schedule */
             $schedule->setCronExpr($cronExpression);
-        } catch (Exception $e) {
+        } catch (Exception) {
             return false;
         }
         return true;
